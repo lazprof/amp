@@ -1,4 +1,4 @@
-
+// functions/_middleware.js - Dengan format URL yang ditingkatkan (support tanda hubung)
 
 export async function onRequest(context) {
   const { request, env, next } = context;
@@ -30,32 +30,52 @@ export async function onRequest(context) {
     } catch (error) {
       console.error('Error loading target.txt:', error);
       // Jika target.txt tidak dapat dibaca, gunakan data fallback
-      targetContent = 'rajawin\nasiampo\njpslot\njp138\ndewa138\ndewa99\ndewaslot77\nbigbos4d\nboss88\nslot99';
+      targetContent = 'kids 77\nkerasakti 777\nkingkong39\nkitty223\nusutoto\nstars88\nbtcplay\nkodokwin\nkubujp\nkudabet88';
     }
     
-    // Parse content dari target.txt menjadi array
+    // Parse content dari target.txt menjadi array dengan format URL yang benar
+    const sitesMap = new Map(); // Untuk menyimpan pasangan originalName -> urlFormat
+    
+    // Array untuk tampilan dan pemrosesan
     const sites = targetContent.split('\n')
       .map(line => line.trim())
       .filter(line => line.length > 0);
+    
+    // Buat map untuk mencari nama situs dan format URL-nya
+    sites.forEach(site => {
+      // Format URL: Jika site mengandung spasi, ganti dengan tanda hubung
+      let urlFormat = site;
+      if (site.includes(' ')) {
+        urlFormat = site.replace(/\s+/g, '-');
+      }
+      // Simpan ke map untuk referensi nanti
+      sitesMap.set(urlFormat.toLowerCase(), site);
+      // Juga simpan versi tanpa tanda hubung, tanpa spasi
+      sitesMap.set(site.toLowerCase().replace(/\s+/g, ''), site);
+    });
     
     // Cari tahu site mana yang sedang diakses
     const pathSegments = url.pathname.split('/').filter(segment => segment);
     const currentSite = pathSegments.length > 0 ? pathSegments[0].toLowerCase() : '';
     
-    // Cek apakah site yang diakses ada dalam target.txt
-    const foundSite = sites.find(site => 
-      site.toLowerCase() === currentSite || 
-      site.toLowerCase().replace(/[^a-z0-9]/g, '') === currentSite
-    );
+    // Cek apakah site yang diakses ada dalam map
+    const originalSiteName = sitesMap.get(currentSite) || 
+                             sitesMap.get(currentSite.replace(/-/g, '')) ||
+                             sitesMap.get(currentSite.replace(/-/g, ' '));
     
-    if (foundSite || pathSegments.length === 0) {
+    if (originalSiteName || pathSegments.length === 0) {
       // Pilih site berdasarkan path atau gunakan random jika path kosong
-      const siteToUse = foundSite || sites[Math.floor(Math.random() * sites.length)];
+      const siteToUse = originalSiteName || sites[Math.floor(Math.random() * sites.length)];
+      
+      // Buat format URL yang benar untuk canonical
+      let urlFormattedSite = siteToUse;
+      if (siteToUse.includes(' ')) {
+        urlFormattedSite = siteToUse.replace(/\s+/g, '-');
+      }
       
       // Buat canonical URL
-      // Gunakan domain yang stabil untuk canonical URL
       const canonicalOrigin = 'https://itkessu.ac.id'; // Ganti dengan domain asli Anda
-      const canonicalUrl = `${canonicalOrigin}/${siteToUse}/`;
+      const canonicalUrl = `${canonicalOrigin}/${urlFormattedSite}/`;
       
       // Generate AMP HTML dengan self-contained design
       const ampHtml = generateAmpHtml(siteToUse, canonicalUrl, sites);
@@ -377,7 +397,7 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   <header class="header">
     <div class="logo-container">
       <a href="https://jali.me/slotobetvip">
-        <amp-img class="logo" src="https://pub-bc2ee8893baf416c8c23af0718d51fc3.r2.dev/slotgacorwin.gif"></amp-img>
+        <amp-img class="logo" src="https://pub-bc2ee8893baf416c8c23af0718d51fc3.r2.dev/slotgacorwin.gif" width="200" height="50" layout="fixed" alt="${siteName.toUpperCase()}"></amp-img>
       </a>
     </div>
     <nav class="main-nav">
