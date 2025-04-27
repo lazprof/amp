@@ -178,6 +178,15 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
       line-height: 1.6;
     }
     
+    /* Banner image styling */
+    .banner-image {
+      margin: 15px 0 25px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+    
     a {
       text-decoration: none;
       color: inherit;
@@ -532,6 +541,16 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   <!-- Main Content -->
   <main class="main-container">
     <div class="site-title">${siteName}</div>
+    
+    <!-- Added banner image above the hero title -->
+    <div class="banner-image">
+      <amp-img src="https://i.imgur.com/XGlU7h5.png" 
+               width="600" 
+               height="300" 
+               layout="responsive" 
+               alt="Banner ${siteName}">
+      </amp-img>
+    </div>
     
     <h1 class="hero-title">
       COBA DAN RASAKAN MAIN SLOTMU DENGAN MAXWIN PALING TINGGI BERSAMA
