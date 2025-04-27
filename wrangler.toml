@@ -1,0 +1,16 @@
+name = "amp"
+main = "src/index.js"
+compatibility_date = "2025-04-27"
+
+[build]
+command = ""
+
+[site]
+bucket = "./public"
+
+[build.upload]
+format = "service-worker"
+
+[[routes]]
+pattern = "*"
+script = "src/index.js"
