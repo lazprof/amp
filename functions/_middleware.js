@@ -1,25 +1,25 @@
-// functions/_middleware.js - Dengan format URL yang ditingkatkan (support tanda hubung)
+// functions/_middleware.js - URL format enhancement with improved UI
 
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
   
-  // Cek apakah request datang dari GoogleBot atau AMP cache
+  // Check if request is from GoogleBot or AMP cache
   const userAgent = request.headers.get('User-Agent') || '';
   const isFromGoogle = userAgent.includes('Googlebot') || userAgent.includes('Google-AMP');
   const isFromAMPCache = url.hostname.includes('cdn.ampproject.org') || 
                          url.hostname.includes('amp.cloudflare.com');
   
-  // Jika ini adalah permintaan untuk target.txt, biarkan diproses normalnya
+  // If this is a request for target.txt, let it process normally
   if (url.pathname.endsWith('/target.txt')) {
     return next();
   }
   
   try {
-    // Baca file target.txt (asumsi file ini ada di assets atau public folder)
+    // Read target.txt file (assuming this file exists in assets or public folder)
     let targetContent;
     try {
-      // Gunakan Cloudflare KV atau file system untuk membaca target.txt
+      // Use Cloudflare KV or file system to read target.txt
       const targetResponse = await fetch(new URL('/target.txt', url.origin));
       
       if (!targetResponse.ok) {
@@ -29,77 +29,77 @@ export async function onRequest(context) {
       targetContent = await targetResponse.text();
     } catch (error) {
       console.error('Error loading target.txt:', error);
-      // Jika target.txt tidak dapat dibaca, gunakan data fallback
+      // If target.txt cannot be read, use fallback data
       targetContent = 'kids 77\nkerasakti 777\nkingkong39\nkitty223\nusutoto\nstars88\nbtcplay\nkodokwin\nkubujp\nkudabet88';
     }
     
-    // Parse content dari target.txt menjadi array dengan format URL yang benar
-    const sitesMap = new Map(); // Untuk menyimpan pasangan originalName -> urlFormat
+    // Parse content from target.txt into array with correct URL format
+    const sitesMap = new Map(); // To store originalName -> urlFormat pairs
     
-    // Array untuk tampilan dan pemrosesan
+    // Array for display and processing
     const sites = targetContent.split('\n')
       .map(line => line.trim())
       .filter(line => line.length > 0);
     
-    // Buat map untuk mencari nama situs dan format URL-nya
+    // Create map to look up site names and URL formats
     sites.forEach(site => {
-      // Format URL: Jika site mengandung spasi, ganti dengan tanda hubung
+      // URL Format: If site contains spaces, replace with hyphens
       let urlFormat = site;
       if (site.includes(' ')) {
         urlFormat = site.replace(/\s+/g, '-');
       }
-      // Simpan ke map untuk referensi nanti
+      // Save to map for later reference
       sitesMap.set(urlFormat.toLowerCase(), site);
-      // Juga simpan versi tanpa tanda hubung, tanpa spasi
+      // Also save version without hyphens, without spaces
       sitesMap.set(site.toLowerCase().replace(/\s+/g, ''), site);
     });
     
-    // Cari tahu site mana yang sedang diakses
+    // Find out which site is being accessed
     const pathSegments = url.pathname.split('/').filter(segment => segment);
     const currentSite = pathSegments.length > 0 ? pathSegments[0].toLowerCase() : '';
     
-    // Cek apakah site yang diakses ada dalam map
+    // Check if accessed site is in the map
     const originalSiteName = sitesMap.get(currentSite) || 
                              sitesMap.get(currentSite.replace(/-/g, '')) ||
                              sitesMap.get(currentSite.replace(/-/g, ' '));
     
     if (originalSiteName || pathSegments.length === 0) {
-      // Pilih site berdasarkan path atau gunakan random jika path kosong
+      // Choose site based on path or use random if path is empty
       const siteToUse = originalSiteName || sites[Math.floor(Math.random() * sites.length)];
       
-      // Buat format URL yang benar untuk canonical
+      // Create correct URL format for canonical
       let urlFormattedSite = siteToUse;
       if (siteToUse.includes(' ')) {
         urlFormattedSite = siteToUse.replace(/\s+/g, '-');
       }
       
-      // Buat canonical URL
-      const canonicalOrigin = 'https://itkessu.ac.id'; // Ganti dengan domain asli Anda
+      // Create canonical URL
+      const canonicalOrigin = 'https://itkessu.ac.id'; // Replace with your actual domain
       const canonicalUrl = `${canonicalOrigin}/${urlFormattedSite}/`;
       
-      // Generate AMP HTML dengan self-contained design
+      // Generate AMP HTML with self-contained design
       const ampHtml = generateAmpHtml(siteToUse, canonicalUrl, sites);
       
-      // Tambahkan header AMP yang diperlukan
+      // Add required AMP headers
       const headers = new Headers();
       headers.set('Content-Type', 'text/html');
       headers.set('AMP-Cache-Transform', 'google;v="1..100"');
       
-      // Jika request berasal dari GoogleBot, sertakan Link header untuk canonical
+      // If request is from GoogleBot, include Link header for canonical
       if (isFromGoogle || isFromAMPCache) {
         headers.set('Link', `<${canonicalUrl}>; rel="canonical"`);
       }
       
-      // Aktifkan cache yang jauh lebih lama - 30 hari (sebulan)
-      const ONE_MONTH_IN_SECONDS = 30 * 24 * 60 * 60; // 30 hari dalam detik
+      // Enable much longer cache - 30 days (a month)
+      const ONE_MONTH_IN_SECONDS = 30 * 24 * 60 * 60; // 30 days in seconds
       headers.set('Cache-Control', `public, max-age=${ONE_MONTH_IN_SECONDS}, s-maxage=${ONE_MONTH_IN_SECONDS}, immutable`);
       
-      // Header tambahan untuk memastikan caching di berbagai sistem
+      // Additional headers to ensure caching across various systems
       headers.set('Expires', new Date(Date.now() + ONE_MONTH_IN_SECONDS * 1000).toUTCString());
       headers.set('Surrogate-Control', `max-age=${ONE_MONTH_IN_SECONDS}`);
       headers.set('CDN-Cache-Control', `max-age=${ONE_MONTH_IN_SECONDS}`);
       
-      // Opsional: Set ETag untuk validasi cache yang efisien
+      // Optional: Set ETag for efficient cache validation
       const etag = `"${siteToUse}-${Date.now().toString(36)}"`;
       headers.set('ETag', etag);
       
@@ -108,7 +108,7 @@ export async function onRequest(context) {
       });
     }
     
-    // Jika site tidak ditemukan, lanjutkan ke handler berikutnya
+    // If site not found, continue to next handler
     return next();
     
   } catch (error) {
@@ -117,12 +117,12 @@ export async function onRequest(context) {
   }
 }
 
-// Fungsi untuk menghasilkan HTML AMP lengkap dengan design seperti gambar referensi
+// Function to generate complete AMP HTML with improved design
 function generateAmpHtml(siteName, canonicalUrl, allSites) {
-  // Acak jackpot value
+  // Generate random jackpot value
   const jackpotValue = generateRandomJackpot();
   
-  // Generate deskripsi dan konten acak yang variatif
+  // Generate varied descriptions and content
   const descriptions = [
     `${siteName.toUpperCase()} situs slot gacor terpercaya dengan koleksi game slot terlengkap, bonus menarik, dan jackpot terbesar. Daftar sekarang untuk maxwin paling tinggi!`,
     `Main slot online di ${siteName.toUpperCase()} dengan rtp tertinggi dan peluang maxwin besar. Nikmati bonus new member 100% dan pelayanan super kencang 24 jam.`,
@@ -132,7 +132,7 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   
   const randomDesc = descriptions[Math.floor(Math.random() * descriptions.length)];
   
-  // Template HTML AMP lengkap dengan design mirip gambar
+  // Complete AMP HTML template with improved design
   return `<!doctype html>
 <html ⚡ lang="id">
 <head>
@@ -143,7 +143,7 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   <meta name="description" content="${randomDesc}">
   <meta name="keywords" content="${siteName}, slot online, judi slot, slot gacor, slot maxwin, slot terpercaya, slot gampang menang">
   
-  <!-- Meta tags khusus yang diminta -->
+  <!-- Custom meta tags -->
   <meta name='author' content='${siteName}' />
   <meta name='language' content='id-ID' />
   <meta name='robots' content='index, follow' />
@@ -164,7 +164,7 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 
   <style amp-custom>
-    /* Base Styles */
+    /* Base Styles with improved aesthetics */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -173,7 +173,7 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     
     body {
       font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-      background-color: #0f0f0f;
+      background-color: #0a0a0a;
       color: #ffffff;
       line-height: 1.6;
     }
@@ -181,16 +181,21 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     a {
       text-decoration: none;
       color: inherit;
+      display: inline-block;
     }
     
-    /* Header Styles */
+    /* Improved Header Styles */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 20px;
-      background-color: #0f0f0f;
-      border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+      padding: 12px 20px;
+      background: linear-gradient(to bottom, #1a1a1a, #0f0f0f);
+      border-bottom: 2px solid #ffc107;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     }
     
     .logo-container {
@@ -205,142 +210,236 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     
     .main-nav {
       display: flex;
-      gap: 10px;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .nav-link {
+      color: #ffffff;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
     }
     
     .login-btn {
-      background: linear-gradient(to right, #e0a800, #ffc107);
+      background: linear-gradient(45deg, #ffc107, #ffeb3b);
       color: #000;
-      padding: 8px 20px;
-      border-radius: 20px;
+      padding: 8px 25px;
+      border-radius: 25px;
       font-weight: bold;
-      border: 2px solid #ffc107;
+      border: none;
       text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
       transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     
     .login-btn:hover {
-      box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
-      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+      transform: translateY(-2px) scale(1.05);
     }
     
-    /* Main Content Styles */
+    /* Improved Main Content Styles */
     .main-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #1a1a1a;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-      margin-top: 30px;
-      margin-bottom: 30px;
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 25px;
+      background: linear-gradient(135deg, #1a1a1a, #222222);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
       position: relative;
       overflow: hidden;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+    
+    .main-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(to right, #ffc107, #ff9800);
     }
     
     .site-title {
       font-size: 16px;
       font-weight: 400;
-      color: #ffffff;
-      margin-bottom: 10px;
+      color: #ffc107;
+      margin-bottom: 15px;
       text-transform: uppercase;
+      letter-spacing: 1px;
     }
     
     .hero-title {
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 700;
-      line-height: 1.2;
+      line-height: 1.3;
       margin-bottom: 20px;
       text-transform: uppercase;
       color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
     
     .brand-highlight {
       display: block;
       font-size: 36px;
       color: #ffc107;
-      margin-top: 10px;
-      text-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+      margin: 15px 0;
+      text-shadow: 0 0 15px rgba(255, 193, 7, 0.7);
+      letter-spacing: 2px;
     }
     
     .site-slogan {
-      font-size: 14px;
+      font-size: 16px;
       font-style: italic;
-      color: #cccccc;
+      color: #e0e0e0;
       margin-bottom: 30px;
+      padding-left: 10px;
+      border-left: 3px solid #ffc107;
     }
     
-    /* Button Styles */
+    /* Improved Button Styles */
     .action-buttons {
       display: flex;
-      gap: 15px;
-      margin-top: 30px;
-      margin-bottom: 30px;
+      gap: 20px;
+      margin: 30px 0;
     }
     
     .register-btn, .login-block-btn {
+      flex: 1;
       display: block;
-      width: 100%;
-      padding: 12px;
+      padding: 15px 20px;
       text-align: center;
-      border-radius: 5px;
+      border-radius: 10px;
       font-weight: bold;
       text-transform: uppercase;
       font-size: 16px;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     
     .register-btn {
-      background: linear-gradient(to right, #ffcc00, #ffd700);
+      background: linear-gradient(45deg, #ffc107, #ffeb3b);
       color: #000000;
       border: none;
     }
     
     .login-block-btn {
-      background: linear-gradient(to right, #3498db, #2980b9);
+      background: linear-gradient(45deg, #2196f3, #03a9f4);
       color: #ffffff;
       border: none;
     }
     
-    .register-btn:hover, .login-block-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    .register-btn::before, .login-block-btn::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(45deg);
+      transition: all 0.5s ease;
+      opacity: 0;
     }
     
-    /* Site Info Styles */
+    .register-btn:hover::before, .login-block-btn:hover::before {
+      opacity: 1;
+      transform: rotate(45deg) translate(20%, 20%);
+    }
+    
+    .register-btn:hover, .login-block-btn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Site Info Styles with better formatting */
     .site-headline {
       text-align: center;
       font-size: 24px;
       font-weight: 700;
       text-transform: uppercase;
-      margin-top: 40px;
-      margin-bottom: 20px;
+      margin: 40px 0 25px;
       color: #ffc107;
+      position: relative;
+      padding-bottom: 15px;
+    }
+    
+    .site-headline::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(to right, #ffc107, transparent);
     }
     
     .site-description {
       text-align: justify;
-      color: #cccccc;
+      color: #e0e0e0;
       margin-bottom: 30px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    
-    /* Footer Styles */
-    .footer {
-      background-color: #0a0a0a;
+      font-size: 15px;
+      line-height: 1.7;
       padding: 15px;
-      text-align: center;
-      font-size: 12px;
-      color: #888888;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      border-left: 3px solid #ffc107;
     }
     
-    /* Responsive Styles */
+    /* Jackpot display */
+    .jackpot-container {
+      background: linear-gradient(45deg, #222222, #333333);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 30px 0;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .jackpot-title {
+      font-size: 18px;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    
+    .jackpot-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffc107;
+      text-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+      letter-spacing: 1px;
+    }
+    
+    /* Improved Footer Styles */
+    .footer {
+      background: linear-gradient(to top, #0a0a0a, #151515);
+      padding: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #999999;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 30px;
+    }
+    
+    .copyright {
+      margin-top: 10px;
+    }
+    
+    /* Responsive Styles with improvements */
     @media (max-width: 768px) {
       .hero-title {
-        font-size: 24px;
+        font-size: 22px;
       }
       
       .brand-highlight {
@@ -354,12 +453,24 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
       .site-headline {
         font-size: 20px;
       }
+      
+      .jackpot-value {
+        font-size: 24px;
+      }
     }
     
     @media (max-width: 480px) {
       .header {
-        flex-direction: column;
+        padding: 10px 15px;
+      }
+      
+      .main-nav {
         gap: 10px;
+      }
+      
+      .login-btn {
+        padding: 6px 15px;
+        font-size: 14px;
       }
       
       .hero-title {
@@ -375,12 +486,26 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
       }
       
       .main-container {
-        padding: 15px;
+        padding: 20px 15px;
+        margin: 15px;
+      }
+      
+      .register-btn, .login-block-btn {
+        padding: 12px 15px;
+        font-size: 14px;
+      }
+      
+      .jackpot-value {
+        font-size: 20px;
       }
     }
   </style>
 
-  <!-- AMP State Data -->
+  <!-- AMP State Data - Fixed the structure to be inside body -->
+</head>
+
+<body>
+  <!-- AMP State Data - Properly placed inside body -->
   <amp-state id="siteData">
     <script type="application/json">
       {
@@ -390,9 +515,7 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
       }
     </script>
   </amp-state>
-</head>
 
-<body>
   <!-- Header -->
   <header class="header">
     <div class="logo-container">
@@ -417,40 +540,52 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     
     <div class="site-slogan">Situs Slot Gacor Paling Aman Ga Pake Ribet!</div>
     
+    <!-- Added jackpot display -->
+    <div class="jackpot-container">
+      <div class="jackpot-title">JACKPOT TERKINI:</div>
+      <div class="jackpot-value">${jackpotValue}</div>
+    </div>
+    
     <div class="action-buttons">
       <a href="https://jali.me/slotobetvip" class="register-btn">Daftar ${siteName}</a>
       <a href="https://jali.me/slotobetvip" class="login-block-btn">Login ${siteName}</a>
     </div>
     
-    <h2 class="site-headline">${siteName.toUpperCase()} SITUS SLOT GACOR PALING PALING GAMPANG CUAN</h2>
+    <h2 class="site-headline">${siteName.toUpperCase()} SITUS SLOT GACOR PALING GAMPANG CUAN</h2>
     
     <div class="site-description">
-      ${siteName.toUpperCase()} salah satu situs slot gacor terbaik datang kembali untuk membuka peluang kepada slotter handal dari indonesia untuk menjadi kaya. ${siteName} deposit 10ribu sudah bisa wd jutaan,pelayan super kencang,rtp akurat dan pastinya member baru lama pasti dimanja paling penting wd kecil besar wajib pay.
+      ${siteName.toUpperCase()} salah satu situs slot gacor terbaik datang kembali untuk membuka peluang kepada slotter handal dari indonesia untuk menjadi kaya. ${siteName} deposit 10ribu sudah bisa wd jutaan, pelayanan super kencang, rtp akurat dan pastinya member baru lama pasti dimanja paling penting wd kecil besar wajib pay.
     </div>
     
-    <!-- More site content can be added here -->
+    <!-- Optional: Game Categories Section -->
+    <div class="site-headline">GAME POPULER ${siteName.toUpperCase()}</div>
+    
+    <div class="site-description">
+      Di ${siteName.toUpperCase()}, kami menyediakan beragam permainan slot dari provider terbaik seperti Pragmatic Play, Habanero, Microgaming, dan PG Soft. Nikmati sensasi bermain slot dengan tingkat kemenangan tinggi dan jackpot progressive yang bisa Anda menangkan setiap harinya. Ayo bergabung sekarang dan raih kemenangan besar!
+    </div>
     
   </main>
   
   <!-- Footer -->
   <footer class="footer">
+    <div>Situs Slot Online Terpercaya di Indonesia</div>
     <div class="copyright">Copyright © ${new Date().getFullYear()} ${siteName.toUpperCase()}. All rights reserved.</div>
   </footer>
 </body>
 </html>`;
 }
 
-// Fungsi untuk menghasilkan nilai jackpot acak
+// Function to generate random jackpot value
 function generateRandomJackpot() {
-  const billions = Math.floor(Math.random() * 10); // 0-9 milyar
-  const millions = Math.floor(Math.random() * 1000); // 0-999 juta
-  const thousands = Math.floor(Math.random() * 1000); // 0-999 ribu
-  const hundreds = Math.floor(Math.random() * 1000); // 0-999 ratus
+  const billions = Math.floor(Math.random() * 10); // 0-9 billion
+  const millions = Math.floor(Math.random() * 1000); // 0-999 million
+  const thousands = Math.floor(Math.random() * 1000); // 0-999 thousand
+  const hundreds = Math.floor(Math.random() * 1000); // 0-999 hundred
   
   return `Rp ${billions},${millions.toString().padStart(3, '0')},${thousands.toString().padStart(3, '0')},${hundreds.toString().padStart(3, '0')}`;
 }
 
-// Fungsi untuk mengacak array
+// Function to randomize array
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
