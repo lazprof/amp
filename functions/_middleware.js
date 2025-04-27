@@ -545,8 +545,8 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     <!-- Added banner image above the hero title -->
     <div class="banner-image">
       <amp-img src="https://i.imgur.com/XGlU7h5.png" 
-               width="600" 
-               height="300" 
+               width="412" 
+               height="412" 
                layout="responsive" 
                alt="Banner ${siteName}">
       </amp-img>
