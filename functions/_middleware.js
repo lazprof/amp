@@ -558,17 +558,17 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     </h1>
     
     <div class="site-slogan">Situs Slot Gacor Paling Aman Ga Pake Ribet!</div>
-    
+    <div class="action-buttons">
+      <a href="https://jali.me/slotobetvip" class="register-btn">Daftar ${siteName}</a>
+      <a href="https://jali.me/slotobetvip" class="login-block-btn">Login ${siteName}</a>
+    </div>    
     <!-- Added jackpot display -->
     <div class="jackpot-container">
       <div class="jackpot-title">JACKPOT TERKINI:</div>
       <div class="jackpot-value">${jackpotValue}</div>
     </div>
     
-    <div class="action-buttons">
-      <a href="https://jali.me/slotobetvip" class="register-btn">Daftar ${siteName}</a>
-      <a href="https://jali.me/slotobetvip" class="login-block-btn">Login ${siteName}</a>
-    </div>
+
     
     <h2 class="site-headline">${siteName.toUpperCase()} SITUS SLOT GACOR PALING GAMPANG CUAN</h2>
     
