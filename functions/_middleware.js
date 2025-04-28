@@ -1,4 +1,4 @@
-// functions/_middleware.js - URL format enhancement with improved UI
+// functions/_middleware.js - Modified for rotating links
 
 export async function onRequest(context) {
   const { request, env, next } = context;
@@ -117,7 +117,7 @@ export async function onRequest(context) {
   }
 }
 
-// Function to generate complete AMP HTML with improved design
+// Function to generate complete AMP HTML with improved design and rotating links
 function generateAmpHtml(siteName, canonicalUrl, allSites) {
   // Generate random jackpot value
   const jackpotValue = generateRandomJackpot();
@@ -132,7 +132,18 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   
   const randomDesc = descriptions[Math.floor(Math.random() * descriptions.length)];
   
-  // Complete AMP HTML template with improved design
+  // Create array of login URLs to rotate through
+  const loginUrls = [
+    "https://jali.me/slotobetvip",
+    "https://jali.me/slotobetgacor",
+    "https://jali.me/slotobetplay",
+    "https://jali.me/slotvip"
+  ];
+  
+  // Convert the array to JSON string for AMP state
+  const loginUrlsJson = JSON.stringify(loginUrls);
+  
+  // Complete AMP HTML template with improved design and rotating links
   return `<!doctype html>
 <html ⚡ lang="id">
 <head>
@@ -250,6 +261,17 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     .login-btn:hover {
       box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
       transform: translateY(-2px) scale(1.05);
+    }
+    
+    /* Animation for login button */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .login-btn-animated {
+      animation: pulse 1.5s infinite;
     }
     
     /* Improved Main Content Styles */
@@ -510,17 +532,18 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     }
   </style>
 
-  <!-- AMP State Data - Fixed the structure to be inside body -->
 </head>
 
 <body>
-  <!-- AMP State Data - Properly placed inside body -->
+  <!-- AMP State Data - Including rotating links -->
   <amp-state id="siteData">
     <script type="application/json">
       {
         "name": "${siteName.toUpperCase()}",
         "canonicalUrl": "${canonicalUrl}",
-        "jackpot": "${jackpotValue}"
+        "jackpot": "${jackpotValue}",
+        "currentUrlIndex": 0,
+        "loginUrls": ${loginUrlsJson}
       }
     </script>
   </amp-state>
@@ -534,7 +557,14 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     </div>
     <nav class="main-nav">
       <a href="https://jali.me/slotobetvip" class="nav-link">Home</a>
-      <a href="https://jali.me/slotobetvip" class="login-btn">Login ⭐️</a>
+      <a href="https://jali.me/slotobetvip" 
+         class="login-btn login-btn-animated"
+         [href]="siteData.loginUrls[siteData.currentUrlIndex]"
+         on="tap:AMP.setState({
+           siteData: {
+             currentUrlIndex: (siteData.currentUrlIndex + 1) % siteData.loginUrls.length
+           }
+         })">Login ⭐️</a>
     </nav>
   </header>
   
@@ -559,8 +589,22 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     
     <div class="site-slogan">Situs Slot Gacor Paling Aman Ga Pake Ribet!</div>
     <div class="action-buttons">
-      <a href="https://jali.me/slotobetvip" class="register-btn">Daftar ${siteName}</a>
-      <a href="https://jali.me/slotobetvip" class="login-block-btn">Login ${siteName}</a>
+      <a href="https://jali.me/slotobetvip" 
+         class="register-btn"
+         [href]="siteData.loginUrls[siteData.currentUrlIndex]"
+         on="tap:AMP.setState({
+           siteData: {
+             currentUrlIndex: (siteData.currentUrlIndex + 1) % siteData.loginUrls.length
+           }
+         })">Daftar ${siteName}</a>
+      <a href="https://jali.me/slotobetvip" 
+         class="login-block-btn"
+         [href]="siteData.loginUrls[siteData.currentUrlIndex]"
+         on="tap:AMP.setState({
+           siteData: {
+             currentUrlIndex: (siteData.currentUrlIndex + 1) % siteData.loginUrls.length
+           }
+         })">Login ${siteName}</a>
     </div>    
     <!-- Added jackpot display -->
     <div class="jackpot-container">
