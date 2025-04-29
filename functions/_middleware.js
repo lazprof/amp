@@ -134,7 +134,7 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   
   // Create array of login URLs to rotate through
   const loginUrls = [
-    "https://jali.me/slotobetvip"
+    "https://jali.me/panikaude"
   ];
   
   // Convert the array to JSON string for AMP state
