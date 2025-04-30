@@ -1,9 +1,10 @@
-// functions/_middleware.js - Modified for rotating links
+// functions/_middleware.js - Modified for rotating links with improved Google detection and no caching
+
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
   
-  // Check if request is from GoogleBot or AMP cache - dengan logging
+  // Check if request is from GoogleBot or AMP cache
   const userAgent = request.headers.get('User-Agent') || '';
   console.log('Received User-Agent:', userAgent);
   
@@ -91,6 +92,8 @@ export async function onRequest(context) {
       const canonicalOrigin = 'https://itkessu.ac.id'; // Replace with your actual domain
       const canonicalUrl = `${canonicalOrigin}/${urlFormattedSite}/`;
       
+      console.log('Generated canonical URL:', canonicalUrl);
+      
       // Generate AMP HTML with self-contained design
       const ampHtml = generateAmpHtml(siteToUse, canonicalUrl, sites);
       
@@ -99,23 +102,31 @@ export async function onRequest(context) {
       headers.set('Content-Type', 'text/html');
       headers.set('AMP-Cache-Transform', 'google;v="1..100"');
       
-      // If request is from GoogleBot, include Link header for canonical
-      if (isFromGoogle || isFromAMPCache) {
+      // PENTING: Hanya tambahkan Link header jika dari Google
+      if (isFromGoogle) {
+        console.log('Request from Google detected, adding canonical Link header');
         headers.set('Link', `<${canonicalUrl}>; rel="canonical"`);
+      } else {
+        console.log('Not a Google request, skipping canonical Link header');
       }
       
-      // Enable much longer cache - 30 days (a month)
-      const ONE_MONTH_IN_SECONDS = 30 * 24 * 60 * 60; // 30 days in seconds
-      headers.set('Cache-Control', `public, max-age=${ONE_MONTH_IN_SECONDS}, s-maxage=${ONE_MONTH_IN_SECONDS}, immutable`);
+      // ANTI-CACHING HEADERS - Untuk memastikan cache Cloudflare selalu dihapus
+      headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      headers.set('Pragma', 'no-cache');
+      headers.set('Expires', '0');
       
-      // Additional headers to ensure caching across various systems
-      headers.set('Expires', new Date(Date.now() + ONE_MONTH_IN_SECONDS * 1000).toUTCString());
-      headers.set('Surrogate-Control', `max-age=${ONE_MONTH_IN_SECONDS}`);
-      headers.set('CDN-Cache-Control', `max-age=${ONE_MONTH_IN_SECONDS}`);
+      // Tambahkan header khusus Cloudflare untuk mencegah cache
+      headers.set('CDN-Cache-Control', 'no-cache');
+      headers.set('Cloudflare-CDN-Cache-Control', 'no-cache');
+      headers.set('Surrogate-Control', 'no-store');
       
-      // Optional: Set ETag for efficient cache validation
-      const etag = `"${siteToUse}-${Date.now().toString(36)}"`;
-      headers.set('ETag', etag);
+      // Tambahkan timestamp untuk memastikan konten selalu dianggap baru
+      const timestamp = Date.now();
+      headers.set('X-Last-Modified', timestamp.toString());
+      
+      // Tambahkan random value untuk memastikan respons tidak di-cache
+      const randomValue = Math.random().toString(36).substring(2, 15);
+      headers.set('X-Random', randomValue);
       
       return new Response(ampHtml, {
         headers: headers
@@ -158,6 +169,10 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   
   // Convert the array to JSON string for AMP state
   const loginUrlsJson = JSON.stringify(loginUrls);
+  
+  // Tambahkan timestamp acak ke HTML untuk mencegah caching
+  const timestamp = Date.now();
+  const randomValue = Math.random().toString(36).substring(2, 15);
   
   // Complete AMP HTML template with improved design and rotating links
   return `<!doctype html>
