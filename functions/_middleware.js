@@ -1,14 +1,28 @@
 // functions/_middleware.js - Modified for rotating links
-
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
   
-  // Check if request is from GoogleBot or AMP cache
+  // Check if request is from GoogleBot or AMP cache - dengan logging
   const userAgent = request.headers.get('User-Agent') || '';
-  const isFromGoogle = userAgent.includes('Googlebot') || userAgent.includes('Google-AMP');
-  const isFromAMPCache = url.hostname.includes('cdn.ampproject.org') || 
-                         url.hostname.includes('amp.cloudflare.com');
+  console.log('Received User-Agent:', userAgent);
+  
+  // Deteksi Google dengan lebih spesifik
+  const isGooglebot = userAgent.includes('Googlebot');
+  const isGoogleAMP = userAgent.includes('Google-AMP');
+  const isAMPCacheFromGoogle = url.hostname.includes('cdn.ampproject.org');
+  const isAMPCacheFromCloudflare = url.hostname.includes('amp.cloudflare.com');
+  
+  // Gabungkan semua kondisi untuk Google
+  const isFromGoogle = isGooglebot || isGoogleAMP || isAMPCacheFromGoogle || isAMPCacheFromCloudflare;
+  
+  console.log('Google detection:', {
+    isGooglebot,
+    isGoogleAMP,
+    isAMPCacheFromGoogle,
+    isAMPCacheFromCloudflare,
+    isFromGoogle
+  });
   
   // If this is a request for target.txt, let it process normally
   if (url.pathname.endsWith('/target.txt')) {
