@@ -553,13 +553,13 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   <!-- Header -->
   <header class="header">
     <div class="logo-container">
-      <a href="https://jali.me/slotobetvip">
+      <a href="https://t.ly/pablokiw">
         <amp-img class="logo" src="https://pub-bc2ee8893baf416c8c23af0718d51fc3.r2.dev/slotgacorwin.gif" width="200" height="50" layout="fixed" alt="${siteName.toUpperCase()}"></amp-img>
       </a>
     </div>
     <nav class="main-nav">
-      <a href="https://jali.me/slotobetvip" class="nav-link">Home</a>
-      <a href="https://jali.me/slotobetvip" 
+      <a href="https://t.ly/pablokiw" class="nav-link">Home</a>
+      <a href="https://t.ly/pablokiw" 
          class="login-btn login-btn-animated"
          [href]="siteData.loginUrls[siteData.currentUrlIndex]"
          on="tap:AMP.setState({
@@ -591,7 +591,7 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
     
     <div class="site-slogan">Situs Slot Gacor Paling Aman Ga Pake Ribet!</div>
     <div class="action-buttons">
-      <a href="https://jali.me/slotobetvip" 
+      <a href="https://t.ly/pablokiw" 
          class="register-btn"
          [href]="siteData.loginUrls[siteData.currentUrlIndex]"
          on="tap:AMP.setState({
@@ -599,7 +599,7 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
              currentUrlIndex: (siteData.currentUrlIndex + 1) % siteData.loginUrls.length
            }
          })">Daftar ${siteName}</a>
-      <a href="https://jali.me/slotobetvip" 
+      <a href="https://t.ly/pablokiw" 
          class="login-block-btn"
          [href]="siteData.loginUrls[siteData.currentUrlIndex]"
          on="tap:AMP.setState({
