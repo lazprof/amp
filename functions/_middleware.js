@@ -572,6 +572,117 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
 </head>
 
 <body>
+<!-- HTML untuk notifikasi withdraw -->
+<div id="withdraw-container">
+  <div id="notification" class="notification">
+    <div class="notification-icon">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="12" fill="#4CAF50" opacity="0.2"/>
+        <path d="M8 12L10.5 14.5L16 9" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="notification-content">
+      <div class="notification-title">Transaksi Berhasil</div>
+      <div id="notification-message" class="notification-message">an****12 Berhasil Withdraw Rp 2.150.000,00</div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #withdraw-container {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    z-index: 9999;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .notification {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #ffffff, #f5f5f5);
+    border-left: 4px solid #4CAF50;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    width: 340px;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  }
+  
+  .notification.show {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  
+  .notification-icon {
+    width: 36px;
+    height: 36px;
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+  
+  .notification-content {
+    flex-grow: 1;
+  }
+  
+  .notification-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 4px;
+  }
+  
+  .notification-message {
+    font-size: 14px;
+    color: #666;
+  }
+</style>
+
+<script>
+  const pesan = [
+    "mv****qt Berhasil Withdraw Rp 6.405.000,00", 
+    "an****12 Berhasil Withdraw Rp 2.150.000,00", 
+    "hi****50 Berhasil Withdraw Rp 5.000.000,00",
+    "ae****00 Berhasil Withdraw Rp 7.780.460,00", 
+    "bq****09 Berhasil Withdraw Rp 2.000.000,00", 
+    "bu****78 Berhasil Withdraw Rp 3.745.000,00", 
+    "cj****46 Berhasil Withdraw Rp 9.440.000,00", 
+    "pe****45 Berhasil Withdraw Rp 10.760.000,00",
+    "ry****46 Berhasil Withdraw Rp 2.850.000,00", 
+    "la****44 Berhasil Withdraw Rp 12.780.000,00",
+    "ka****78 Berhasil Withdraw Rp 3.750.000,00"
+  ];
+  
+  let index = 0;
+  const notification = document.getElementById('notification');
+  const notificationMessage = document.getElementById('notification-message');
+  
+  function showNotification() {
+    // Perbarui pesan
+    notificationMessage.textContent = pesan[index];
+    
+    // Tampilkan notifikasi
+    notification.classList.add('show');
+    
+    // Sembunyikan setelah 3 detik
+    setTimeout(() => {
+      notification.classList.remove('show');
+      
+      // Persiapkan indeks untuk notifikasi berikutnya
+      index = (index + 1) % pesan.length;
+    }, 3000);
+  }
+  
+  // Tampilkan notifikasi pertama setelah 1 detik
+  setTimeout(() => {
+    showNotification();
+    
+    // Tampilkan notifikasi berikutnya setiap 6 detik
+    setInterval(showNotification, 6000);
+  }, 1000);
+</script>
   <!-- AMP State Data - Including rotating links -->
   <amp-state id="siteData">
     <script type="application/json">
