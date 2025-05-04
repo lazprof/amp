@@ -588,58 +588,6 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   </div>
 </div>
 
-<style>
-  #withdraw-container {
-    position: fixed;
-    top: 30px;
-    right: 30px;
-    z-index: 9999;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  .notification {
-    display: flex;
-    align-items: center;
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #ffffff, #f5f5f5);
-    border-left: 4px solid #4CAF50;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    width: 340px;
-    transform: translateX(400px);
-    opacity: 0;
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  }
-  
-  .notification.show {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  
-  .notification-icon {
-    width: 36px;
-    height: 36px;
-    margin-right: 16px;
-    flex-shrink: 0;
-  }
-  
-  .notification-content {
-    flex-grow: 1;
-  }
-  
-  .notification-title {
-    font-weight: 600;
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 4px;
-  }
-  
-  .notification-message {
-    font-size: 14px;
-    color: #666;
-  }
-</style>
-
   <!-- AMP State Data - Including rotating links -->
   <amp-state id="siteData">
     <script type="application/json">
