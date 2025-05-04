@@ -572,21 +572,6 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
 </head>
 
 <body>
-<!-- HTML untuk notifikasi withdraw -->
-<div id="withdraw-container">
-  <div id="notification" class="notification">
-    <div class="notification-icon">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="12" fill="#4CAF50" opacity="0.2"/>
-        <path d="M8 12L10.5 14.5L16 9" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <div class="notification-content">
-      <div class="notification-title">Transaksi Berhasil</div>
-      <div id="notification-message" class="notification-message">an****12 Berhasil Withdraw Rp 2.150.000,00</div>
-    </div>
-  </div>
-</div>
 
   <!-- AMP State Data - Including rotating links -->
   <amp-state id="siteData">
