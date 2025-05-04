@@ -640,49 +640,6 @@ function generateAmpHtml(siteName, canonicalUrl, allSites) {
   }
 </style>
 
-<script>
-  const pesan = [
-    "mv****qt Berhasil Withdraw Rp 6.405.000,00", 
-    "an****12 Berhasil Withdraw Rp 2.150.000,00", 
-    "hi****50 Berhasil Withdraw Rp 5.000.000,00",
-    "ae****00 Berhasil Withdraw Rp 7.780.460,00", 
-    "bq****09 Berhasil Withdraw Rp 2.000.000,00", 
-    "bu****78 Berhasil Withdraw Rp 3.745.000,00", 
-    "cj****46 Berhasil Withdraw Rp 9.440.000,00", 
-    "pe****45 Berhasil Withdraw Rp 10.760.000,00",
-    "ry****46 Berhasil Withdraw Rp 2.850.000,00", 
-    "la****44 Berhasil Withdraw Rp 12.780.000,00",
-    "ka****78 Berhasil Withdraw Rp 3.750.000,00"
-  ];
-  
-  let index = 0;
-  const notification = document.getElementById('notification');
-  const notificationMessage = document.getElementById('notification-message');
-  
-  function showNotification() {
-    // Perbarui pesan
-    notificationMessage.textContent = pesan[index];
-    
-    // Tampilkan notifikasi
-    notification.classList.add('show');
-    
-    // Sembunyikan setelah 3 detik
-    setTimeout(() => {
-      notification.classList.remove('show');
-      
-      // Persiapkan indeks untuk notifikasi berikutnya
-      index = (index + 1) % pesan.length;
-    }, 3000);
-  }
-  
-  // Tampilkan notifikasi pertama setelah 1 detik
-  setTimeout(() => {
-    showNotification();
-    
-    // Tampilkan notifikasi berikutnya setiap 6 detik
-    setInterval(showNotification, 6000);
-  }, 1000);
-</script>
   <!-- AMP State Data - Including rotating links -->
   <amp-state id="siteData">
     <script type="application/json">
